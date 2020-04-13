@@ -3,6 +3,7 @@
 #include<fstream>
 #include<sstream>
 #include<vector>
+#include<algorithm>
 
 
 using namespace std;
@@ -65,25 +66,53 @@ int FIFO_page_faults(vector<int> pages_requested, int working_frame_number)
 }
 int LRU_page_faults(vector<int> pages_requested, int working_frame_number)
 {
-    int page_hits;
-    int page_faults;
+    int page_hits=0;
+    int page_faults=0;
     vector<int> working_set;
+    vector<int> track;
     vector<int>::iterator it;
+    vector<int>::iterator it2;
     
-    while(!pages_requested.empty())
+   while(!pages_requested.empty())
     {
         int ser = pages_requested[0];
         it = find (working_set.begin(), working_set.end(), ser);
         if (it != working_set.end())
         {
             //Page Hits
+            page_hits++;
+            track.push_back(pages_requested[0]);
+            it = find(working_set.begin(), working_set.end(), pages_requested[0]);
+            if( it2 != working_set.end())
+            {
+                int temp3  = it-working_set.begin();
+                working_set.erase(working_set.begin()+temp3-1);
+                working_set.push_back(pages_requested[0]);
+            }
+            else
+            {
+                //
+            }
+            
         }
         else
         {
-            //Page_faults
+            page_faults++;
+            working_set.push_back(pages_requested[0]);
+            if(working_set.size()>working_frame_number)
+            {
+                working_set.erase(working_set.begin());
+            }
+            
+            
+            
+           //Page_faults*/
         }
+        pages_requested.erase(pages_requested.begin());
     }
+    return page_hits;
 }
+
 
 // MAIN Function.
 int main()
@@ -122,13 +151,15 @@ int main()
 //    PrintVectors(trial);
     
     int frame_size;
-    int x;
+    int x,y;
     frame_size = trial[0];
     trial.erase(trial.begin());
     PrintVectors(trial);
     cout<<endl<<endl<<endl<<frame_size;
     x=FIFO_page_faults(trial,frame_size);
     cout<<endl<<x;
+    y=LRU_page_faults(trial,frame_size);
+    cout<<endl<<y;
     
 }
 
