@@ -23,6 +23,13 @@ void PrintVectors(vector<int> x)
     }
 }
 
+struct Template
+{
+    int frame;
+    int frequency;
+};
+
+
 
 /*
  
@@ -86,7 +93,7 @@ int LRU_page_faults(vector<int> pages_requested, int working_frame_number)
             if( it2 != working_set.end())
             {
                 int temp3  = it-working_set.begin();
-                working_set.erase(working_set.begin()+temp3-1);
+                working_set.erase(working_set.begin()+temp3);
                 working_set.push_back(pages_requested[0]);
             }
             else
@@ -104,16 +111,95 @@ int LRU_page_faults(vector<int> pages_requested, int working_frame_number)
                 working_set.erase(working_set.begin());
             }
             
-            
-            
            //Page_faults*/
         }
         pages_requested.erase(pages_requested.begin());
     }
-    return page_hits;
+    return page_faults;
 }
 
+int MFU_page_faults(vector<int> pages_requested, int working_frame_number)
+{
+    int page_hits=0;
+    int page_faults=0;
+    int total_pages = pages_requested.size();
+    vector<Template> data;
+    vector<int>::iterator it;
+    
+    while(!pages_requested.empty())
+    {
+        vector<int> working_set;
+        for(int i=0;i<data.size();i++)
+        {
+            working_set.push_back(data[i].frame);
+        }
+        int ser = pages_requested[0];
+        it = find (working_set.begin(), working_set.end(), ser);
+//        cout<<"Start:"<<endl;
+        if (it != working_set.end())
+        {
+//            cout<<"PageHit!!"<<endl;
+            //page_hits
+            int s=0;
+            while (s<data.size())
+            {
+                if(data[s].frame == ser)
+                {
+                    data[s].frequency+=1;
+                }
+                s++;
+            }
+            page_hits++;
+            
+        }
+        else
+        {
+                //page_faults
+            
+            if(data.size()<working_frame_number)
+            {
+                Template t;
+                t.frame = ser;
+                t.frequency=1;
+                data.push_back(t);
+            }
+            else
+            {
+                int index=0;
+                int s=0;
+                while(s<data.size())
+                {
+                    if(data[s].frequency > index)
+                    {
+                        index = s;
+                    }
+                    else
+                    {
+                     //
+                    }
+                    s++;
+                }
+                
+                data.erase(data.begin()+index);
+                
+                Template t2;
+                
+                t2.frame = ser;
+                t2.frequency = 1;
+                data.push_back(t2);
+            }
+        }
+        pages_requested.erase(pages_requested.begin());
+        
+    }
+    return (total_pages-page_hits);
 
+}
+
+int Optimal_page_faults(vector<int> pages_requested, int working_frame_number)
+{
+    //
+}
 // MAIN Function.
 int main()
 {
@@ -151,15 +237,17 @@ int main()
 //    PrintVectors(trial);
     
     int frame_size;
-    int x,y;
+    int x,y,z;
     frame_size = trial[0];
     trial.erase(trial.begin());
-    PrintVectors(trial);
+//    PrintVectors(trial);
     cout<<endl<<endl<<endl<<frame_size;
     x=FIFO_page_faults(trial,frame_size);
-    cout<<endl<<x;
+    cout<<endl<<x<<" FIFO";
     y=LRU_page_faults(trial,frame_size);
-    cout<<endl<<y;
+    cout<<endl<<y<<"  LRU";
+    z=MFU_page_faults(trial,frame_size);
+    cout<<endl<<z<<"  MFU";
     
 }
 
