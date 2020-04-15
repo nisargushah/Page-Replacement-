@@ -1,3 +1,11 @@
+/*
+    Nisarg Shah
+ 
+    Hemantha Govinsu
+ 
+ */
+
+
 #include<string>
 #include<iostream>
 #include<fstream>
@@ -162,6 +170,7 @@ int MFU_page_faults(vector<int> pages_requested, int working_frame_number)
                 t.frame = ser;
                 t.frequency=1;
                 data.push_back(t);
+                page_faults++;
             }
             else
             {
@@ -187,24 +196,100 @@ int MFU_page_faults(vector<int> pages_requested, int working_frame_number)
                 t2.frame = ser;
                 t2.frequency = 1;
                 data.push_back(t2);
+                page_faults++;
             }
         }
         pages_requested.erase(pages_requested.begin());
         
     }
-    return (total_pages-page_hits);
+    return page_faults;
 
 }
 
 int Optimal_page_faults(vector<int> pages_requested, int working_frame_number)
 {
-    //
+    //Optimal Page Fault Algorithm
+    int page_faults=0;
+    int page_hits = 0;
+    vector<int> working_set;
+    int page_size = pages_requested.size();
+    vector<int>::iterator it;
+//    cout<<endl<<page_size<<endl;
+    
+    while(!pages_requested.empty())
+    {
+        int ser = pages_requested[0];
+        it = find (working_set.begin(), working_set.end(), ser);
+        if(it!=working_set.end())
+        {
+            //page hit
+        }
+        else
+        {
+                //page Faults
+//            cout<<endl<<"It goes through here "<<endl;
+            if(working_set.size()<working_frame_number)
+            {
+                working_set.push_back(ser);
+                page_faults++;
+//                cout<<endl<<working_set.size()<<endl;
+            }
+            else
+            {
+                //STEP 1: Search which frame to replace.
+                //        Should be the one that is reuired the farthest.
+                vector<int> test;
+                int erase_element;
+                
+                for(int i =0 ;i < working_set.size();i++)
+                {
+                    test.push_back(working_set[i]);
+                }
+                for(int i=1;i<pages_requested.size();i++)
+                {
+                    if(test.size() == 1)
+                    {
+                        erase_element = test[0];
+                     }
+                    else
+                    {
+                        for(int j=0;j<test.size();j++)
+                        {
+                            if(test[j] == pages_requested[i])
+                            {
+                                test.erase(test.begin()+j);
+                            }
+                        }
+                    }
+                    
+                }
+                //Find index of that element ;
+                
+                int index2;
+                for(int k=0;k<working_set.size();k++)
+                {
+                    if(working_set[k] == erase_element)
+                    {
+                        index2 = k;
+                    }
+                }
+                working_set.erase(working_set.begin()+index2);
+                working_set.push_back(ser);
+                page_faults++;
+            }
+        }
+        
+        pages_requested.erase(pages_requested.begin());
+        
+    }
+    
+    return page_faults;
 }
 // MAIN Function.
 int main()
 {
     string myText;
-    vector<int> trial;
+   vector<int> trial;
     ifstream MyReadFile("filename.txt");
 
     // Use a while loop together with the getline() function to read the file line by line
@@ -213,6 +298,7 @@ int main()
 //      cout << myText;
 //      cout<<" ";
 //      cout<<endl;
+         
         istringstream ss(myText);
         
         
@@ -229,6 +315,22 @@ int main()
               trial.push_back(a); // While there is more to read
           } while (ss);
 //        PrintVectors(trial);
+        int frame_size;
+        int x,y,z,w;
+        cout<<endl;
+        frame_size = trial[0];
+        trial.erase(trial.begin());
+        x=FIFO_page_faults(trial,frame_size);
+        cout<<"Page faults in FIFO : \t"<<x<<endl;
+        y=LRU_page_faults(trial,frame_size);
+        cout<<"Page faults in LRU : \t"<<y<<endl;
+        z=MFU_page_faults(trial,frame_size);
+        cout<<"Page faults in MFU : \t"<<z<<endl;
+        w=Optimal_page_faults(trial,frame_size);
+        cout<<"Page faults in Optimal: "<<w<<endl;
+        trial.clear();
+        cout<<endl<<endl;
+        
     }
 
     // Close the file
@@ -236,23 +338,14 @@ int main()
     
 //    PrintVectors(trial);
     
-    int frame_size;
-    int x,y,z;
-    frame_size = trial[0];
-    trial.erase(trial.begin());
+    
+//
 //    PrintVectors(trial);
-    cout<<endl<<endl<<endl<<frame_size;
-    x=FIFO_page_faults(trial,frame_size);
-    cout<<endl<<x<<" FIFO";
-    y=LRU_page_faults(trial,frame_size);
-    cout<<endl<<y<<"  LRU";
-    z=MFU_page_faults(trial,frame_size);
-    cout<<endl<<z<<"  MFU";
+//    cout<<endl<<endl<<endl<<frame_size<<" Frame Size";
+    
+//    cout<<endl<<"Page size : "<<trial.size();
     
 }
-
-
-
 
 //Working_frame_number is number of frames which we got from the first element of our input file.
             
