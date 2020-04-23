@@ -1,10 +1,3 @@
-/*
-    Nisarg Shah
- 
-    Hemantha Govinsu
- 
- */
-
 
 #include<string>
 #include<iostream>
